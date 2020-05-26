@@ -18,6 +18,11 @@
         }
     },
     "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Cuitcode\\Paystack\\": "src"
+        }
+    },
     "require": {
         "guzzlehttp/guzzle": "*",
         "illuminate/support": "*",
