@@ -1,0 +1,32 @@
+{
+    "name": "cuitcode/paystack",
+    "description": "Laravel Package for Paystack (paystack.com)",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cuitcode",
+            "email": "tech@cuitcode.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cuitcode\\Paystack\\PaystackServiceProvider"
+            ],
+            "aliases": {
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "guzzlehttp/guzzle": "^7.0@dev",
+        "illuminate/support": "^8.0@dev",
+        "illuminate/database": "^8.0@dev",
+        "illuminate/http": "^8.0@dev",
+        "illuminate/routing": "^8.0@dev",
+        "symfony/symfony": "^5.2@dev"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0@dev"
+    }
+}
