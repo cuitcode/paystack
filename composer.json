@@ -17,15 +17,15 @@
             }
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {
-        "guzzlehttp/guzzle": "^7.0@dev",
-        "illuminate/support": "^8.0@dev",
-        "illuminate/database": "^8.0@dev",
-        "illuminate/http": "^8.0@dev",
-        "illuminate/routing": "^8.0@dev"
+        "guzzlehttp/guzzle": "*",
+        "illuminate/support": "*",
+        "illuminate/database": "*",
+        "illuminate/http": "*",
+        "illuminate/routing": "*"
     },
     "require-dev": {
-        "orchestra/testbench": "^6.0@dev"
+        "orchestra/testbench": "*"
     }
 }
