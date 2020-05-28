@@ -136,9 +136,29 @@ trait ManagesPlan
      */
     public function deletePaystackPlan(array $options = [])
     {       
-       return PaystackPlan::delete(
+        if (! array_key_exists('name', $options) && $name = $this->name) {
+            $options['name'] = $name;
+        }
+
+        if (! array_key_exists('description', $options) && $description = $this->description) {
+            $options['description'] = $description;
+        }
+
+        if (! array_key_exists('amount', $options) && $amount = $this->amount) {
+            $options['amount'] = $amount;
+        }
+
+        if (! array_key_exists('interval', $options) && $interval = $this->interval) {
+            $options['interval'] = $interval;
+        }
+
+        if (! array_key_exists('currency', $options) && $currency = $this->currency) {
+            $options['currency'] = $currency;
+        }
+
+        return PaystackPlan::delete(
             $this->plan_code, $options, $this->paystackOptions()
-       );
+        );
     }
 
     /**
