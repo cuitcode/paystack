@@ -12,7 +12,7 @@ use Cuitcode\Paystack\Utils\Util;
 trait Delete
 {
     //
-    public static function delete($params = null, $opts = null) {
+    public static function delete($id, $params = null, $opts = null) {
         self::_validateParams($params);
 
         $url = $this->instanceUrl();
