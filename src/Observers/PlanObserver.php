@@ -31,12 +31,12 @@ class PlanObserver
     }
 
     /**
-     * Handle the plan "deleted" event.
+     * Handle the plan "deleting" event.
      *
      * @param  \App\Cuitcode\Paystack\Models\Plan  $plan
      * @return void
      */
-    public function deleted(Plan $plan)
+    public function deleting(Plan $plan)
     {
         //
         $plan->deletePaystackPlan();
