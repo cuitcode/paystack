@@ -15,10 +15,10 @@ trait Delete
     public static function delete($id, $params = null, $opts = null) {
         self::_validateParams($params);
 
-        $url = $this->instanceUrl();
-        list($response, $opts) = $this->_request('delete', $url, $params, $opts);
-        $this->refreshFrom($response, $opts);
+        $url = static::resourceUrl($id);
+        list($response, $opts) = static::_staticRequest('delete', $url, $params, $opts);
+        // static::refreshFrom($response, $opts);
 
-        return $this;
+        // return $this;
     }
 }
