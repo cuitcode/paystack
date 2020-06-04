@@ -155,8 +155,8 @@ trait ManagesPlan
      */
      public function createOrGetPaystackPlan(array $options = [])
      {
-         if ($this->hasPaystackId()) {
-             return $this->asPaystackPlan();
+         if ($this->hasPlanCode()) {
+             return $this;
          }
  
          return $this->createAsPaystackPlan($options);
