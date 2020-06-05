@@ -24,6 +24,8 @@ class VerifySignature
             $secret = config('cc_paystack.live.secret');
         }
 
+        Log::info('Showing request details '.$request);
+
         try {
             WebhookSignature::verifyHeader(
                 $request->body(),

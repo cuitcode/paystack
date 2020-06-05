@@ -4,6 +4,7 @@ namespace Cuitcode\Paystack\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Cuitcode\Paystack\Http\Middlewares\VerifySignature;
 
 class Webhook extends Controller
@@ -15,12 +16,14 @@ class Webhook extends Controller
      */
     public function __construct()
     {
-        $secret = config('cc_paystack.test.secret');;
+        $secret = config('cc_paystack.test.secret');
 
         // return live credentials
         if(config('cc_paystack.live_mode')) {
             $secret = config('cc_paystack.live.secret');
         }
+        
+        Log::info('Showing client secret info '.$secret);
 
         if (null !== $secret) {
             $this->middleware(VerifySignature::class);
