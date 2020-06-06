@@ -70,76 +70,37 @@ class Webhook extends Controller
     protected function handleSubscriptionCreate(array $payload)
     {
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
-            $data = $payload['data']['object'];
+            $data = $payload['data'];
             $subscription = new Subscription;
+            $subscription->user_id = $user->id;
+            $subscription->code = $payload['data']['subscription_code'];
             $subscription->paystack_id = $user->paystack_id;
-            $subscription->customer_code = $payload['data']['subscription_code'];
-            $subscription->sub_code = $payload['data']['subscription_code'];
+            $subscription->status = $payload['data']['status'];
             $subscription->plan_code = $payload['data']['plan']['plan_code'];
-            $subscription->created_at = $payload['data']['createdAt'];
+            $subscription->starts_at = $payload['data']['createdAt'];
+            $subscription->ends_at = $payload['data']['createdAt'];
 
-            $user->subscriptions->filter(function (Subscription $subscription) use ($data) {
-                return $subscription->paystack_id === $data['id'];
-            })->each(function (Subscription $subscription) use ($data) {
-                if (isset($data['status']) && $data['status'] === 'incomplete_expired') {
-                    $subscription->items()->delete();
-                    $subscription->delete();
 
-                    return;
+            $subscription->save(); //save subscription
+
+            // Update subscription items...
+            if (isset($data['items'])) {
+                $plans = [];
+
+                foreach ($data['items']['data'] as $item) {
+                    $plans[] = $item['plan']['id'];
+
+                    $subscription->items()->updateOrCreate([
+                        'paystack_id' => $item['id'],
+                    ], [
+                        'paystack_plan' => $item['plan']['id'],
+                        'quantity' => $item['quantity'],
+                    ]);
                 }
 
-                // Plan...
-                $subscription->paystack_plan = $data['plan']['id'] ?? null;
-
-                // Quantity...
-                $subscription->quantity = $data['quantity'];
-
-                // Trial ending date...
-                if (isset($data['trial_end'])) {
-                    $trialEnd = Carbon::createFromTimestamp($data['trial_end']);
-
-                    if (! $subscription->trial_ends_at || $subscription->trial_ends_at->ne($trialEnd)) {
-                        $subscription->trial_ends_at = $trialEnd;
-                    }
-                }
-
-                // Cancellation date...
-                if (isset($data['cancel_at_period_end'])) {
-                    if ($data['cancel_at_period_end']) {
-                        $subscription->ends_at = $subscription->onTrial()
-                            ? $subscription->trial_ends_at
-                            : Carbon::createFromTimestamp($data['current_period_end']);
-                    } else {
-                        $subscription->ends_at = null;
-                    }
-                }
-
-                // Status...
-                if (isset($data['status'])) {
-                    $subscription->paystack_status = $data['status'];
-                }
-
-                $subscription->save();
-
-                // Update subscription items...
-                if (isset($data['items'])) {
-                    $plans = [];
-
-                    foreach ($data['items']['data'] as $item) {
-                        $plans[] = $item['plan']['id'];
-
-                        $subscription->items()->updateOrCreate([
-                            'paystack_id' => $item['id'],
-                        ], [
-                            'paystack_plan' => $item['plan']['id'],
-                            'quantity' => $item['quantity'],
-                        ]);
-                    }
-
-                    // Delete items that aren't attached to the subscription anymore...
-                    $subscription->items()->whereNotIn('paystack_plan', $plans)->delete();
-                }
-            });
+                // Delete items that aren't attached to the subscription anymore...
+                $subscription->items()->whereNotIn('paystack_plan', $plans)->delete();
+            }
         }
 
         return $this->successMethod();
