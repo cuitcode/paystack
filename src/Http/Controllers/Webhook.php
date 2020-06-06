@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Cuitcode\Paystack\Paystack;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Cuitcode\Paystack\Models\Subscription;
 use Cuitcode\Paystack\Events\WebhookHandled;
 use Cuitcode\Paystack\Events\WebhookReceived;
 use Symfony\Component\HttpFoundation\Response;
