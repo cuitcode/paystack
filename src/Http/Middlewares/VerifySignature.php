@@ -3,6 +3,8 @@
 namespace Cuitcode\Paystack\Http\Middlewares;
 
 use Closure;
+use Illuminate\Support\Facades\Log;
+use Cuitcode\Paystack\WebhookSignature;
 use Cuitcode\Paystack\Exceptions\SignatureVerification;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -17,18 +19,16 @@ class VerifySignature
      */
     public function handle($request, Closure $next)
     {
-        $secret = config('cc_paystack.test.secret');;
+        $secret = config('cc_paystack.test.secret');
 
         // return live credentials
         if(config('cc_paystack.live_mode')) {
             $secret = config('cc_paystack.live.secret');
         }
 
-        Log::info('Showing request details '.$request);
-
         try {
             WebhookSignature::verifyHeader(
-                $request->body(),
+                $request->getContent(),
                 $request->header('X-Paystack-Signature'),
                 $secret
             );

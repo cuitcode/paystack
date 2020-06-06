@@ -40,6 +40,40 @@ class Paystack {
     }
 
     /**
+     * Get the billable entity instance by Paystack ID.
+     *
+     * @param  string  $paystackId
+     * @return \Cuitcode\Paystack\Billable|null
+     */
+    public static function findBillable($paystackId)
+    {
+        if ($paystackId === null) {
+            return;
+        }
+
+        $model = config('cc_paystack.model');
+
+        return (new $model)->where('paystack_id', $paystackId)->first();
+    }
+
+    /**
+     * Get the billable entity instance by Paystack ID.
+     *
+     * @param  string  $paystackId
+     * @return \Cuitcode\Paystack\Billable|null
+     */
+    public static function findBillableWithCode($paystackCode)
+    {
+        if ($paystackCode === null) {
+            return;
+        }
+
+        $model = config('cc_paystack.model');
+
+        return (new $model)->where('paystack_code', $paystackCode)->first();
+    }
+
+    /**
      * Get the default Paystack options.
      *
      * @param  array  $options

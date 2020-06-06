@@ -1,6 +1,6 @@
 <?php
 
-namespace Paystack\Exception;
+namespace Cuitcode\Paystack\Exceptions;
 
 use Exception;
 

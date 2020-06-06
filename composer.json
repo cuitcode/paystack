@@ -26,9 +26,10 @@
     "require": {
         "guzzlehttp/guzzle": "*",
         "illuminate/support": "*",
-        "illuminate/database": "*",
+        "illuminate/database": "^7.14",
         "illuminate/http": "*",
-        "illuminate/routing": "*"
+        "illuminate/routing": "*",
+        "nesbot/carbon": "^2.35"
     },
     "require-dev": {
         "orchestra/testbench": "*"
