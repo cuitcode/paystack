@@ -12,7 +12,7 @@ return [
     | To learn more, visit: https://dashboard.paystack.com/#/settings/developer
     |
     */
-
+    'model' => env('CC_PAYSTACK_MODEL', 'App\User'),
     /*
     |--------------------------------------------------------------------------
     | API STATUS
@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'live_mode' => env('CC_PAYSTACK_LIVE_MODE', 'FALSE'),
+    'live_mode' => env('CC_PAYSTACK_LIVE_MODE', FALSE),
 
     /*
     |--------------------------------------------------------------------------
@@ -44,8 +44,8 @@ return [
     */
 
     'test' => [
-        'secret' => env('CC_PAYSTACK_TEST_SECRET', null), // sk_test_your_secret_key_is_required
-        'public' => env('CC_PAYSTACK_TEST_PUBLIC', null), // pk_test_your_public_key_is_required
+        'secret' => env('CC_PAYSTACK_TEST_SECRET', NULL), // sk_test_your_secret_key_is_required
+        'public' => env('CC_PAYSTACK_TEST_PUBLIC', NULL), // pk_test_your_public_key_is_required
         'callback' => env('CC_PAYSTACK_TEST_CALLBACK', '/paystack/test/callback'),
         'webhook' => env('CC_PAYSTACK_TEST_WEBHOOK', '/paystack/test/webhook'),
     ],
@@ -66,8 +66,8 @@ return [
     */
 
     'live' => [
-        'secret' => env('CC_PAYSTACK_LIVE_SECRET', null), // sk_live_your_secret_key_is_required
-        'public' => env('CC_PAYSTACK_LIVE_PUBLIC', null), // pk_live_your_public_key_is_required
+        'secret' => env('CC_PAYSTACK_LIVE_SECRET', NULL), // sk_live_your_secret_key_is_required
+        'public' => env('CC_PAYSTACK_LIVE_PUBLIC', NULL), // pk_live_your_public_key_is_required
         'callback' => env('CC_PAYSTACK_LIVE_CALLBACK', '/paystack/callback'),
         'webhook' => env('CC_PAYSTACK_LIVE_WEBHOOK', '/paystack/webhook'),
     ],
