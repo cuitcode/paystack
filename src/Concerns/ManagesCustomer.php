@@ -21,6 +21,16 @@ trait ManagesCustomer
     }
 
     /**
+     * Retrieve the Paystack customer ID.
+     *
+     * @return string|null
+     */
+    public function paystackCode()
+    {
+        return $this->paystack_code;
+    }
+
+    /**
      * Determine if the entity has a Paystack customer ID.
      *
      * @return bool
@@ -81,9 +91,8 @@ trait ManagesCustomer
             $options, $this->paystackOptions()
         );
 
-        // dd($customer);
-
         $this->paystack_id = $customer["data"]->id;
+        $this->paystack_code = $customer["data"]->customer_code;
         // $this->paystack_id = $customer["data"]["id"];
 
         $this->save();
