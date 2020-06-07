@@ -44,7 +44,7 @@ class Webhook extends Controller
     public function handleWebhook(Request $request)
     {
         $payload = json_decode($request->getContent(), true);
-        // Log::info('webhook data'. $request->getContent());
+        Log::info('webhook data'. $request->getContent());
         // dd(gettype($request->getContent()));
         // dd(json_last_error_msg());
         // dd($payload);
@@ -85,7 +85,7 @@ class Webhook extends Controller
 
             $subscription->save(); //save subscription
 
-            Log::info('done saving subscription');
+            // Log::info('done saving subscription');
 
             // Update subscription items...
             if (isset($data['items'])) {
