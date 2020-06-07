@@ -43,6 +43,7 @@ class Webhook extends Controller
     public function handleWebhook(Request $request)
     {
         $payload = json_decode($request->getContent(), true);
+        Log::info('webhook data'. $request->getContent());
         // dd(gettype($request->getContent()));
         // dd(json_last_error_msg());
         // dd($payload);
