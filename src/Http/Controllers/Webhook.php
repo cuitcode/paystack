@@ -86,6 +86,8 @@ class Webhook extends Controller
 
             $subscription->save(); //save subscription
 
+            Log::info('done saving subscription');
+
             // Update subscription items...
             if (isset($data['items'])) {
                 $plans = [];
