@@ -30,7 +30,7 @@ class Subscription extends Model
      *
      * @var array
      */
-    protected $with = ['items'];
+    // protected $with = ['items'];
 
     /**
      * The attributes that should be cast to native types.
