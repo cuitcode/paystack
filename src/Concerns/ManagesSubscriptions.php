@@ -43,12 +43,13 @@ trait ManagesSubscriptions
      * @param  string  $name
      * @return \Cuitcode\Paystack\Subscription|null
      */
-    public function subscription($name = 'default')
+    public function subscription($code = null)
     {
         return $this->subscriptions->sortByDesc(function (Subscription $subscription) {
             return $subscription->created_at->getTimestamp();
-        })->first(function (Subscription $subscription) use ($name) {
-            return $subscription->name === $name;
+        })->first(function (Subscription $subscription) use ($code) {
+            if(null === $code) return $subscription->status === 'active';
+            return $subscription->code === $code;
         });
     }
 

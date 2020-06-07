@@ -317,38 +317,6 @@ class Subscription extends Model
     }
 
     /**
-     * Determine if the subscription is within its trial period.
-     *
-     * @return bool
-     */
-    public function onTrial()
-    {
-        return $this->trial_ends_at && $this->trial_ends_at->isFuture();
-    }
-
-    /**
-     * Filter query by on trial.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return void
-     */
-    public function scopeOnTrial($query)
-    {
-        $query->whereNotNull('trial_ends_at')->where('trial_ends_at', '>', Carbon::now());
-    }
-
-    /**
-     * Filter query by not on trial.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return void
-     */
-    public function scopeNotOnTrial($query)
-    {
-        $query->whereNull('trial_ends_at')->orWhere('trial_ends_at', '<=', Carbon::now());
-    }
-
-    /**
      * Determine if the subscription is within its grace period after cancellation.
      *
      * @return bool
