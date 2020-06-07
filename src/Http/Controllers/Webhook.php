@@ -81,8 +81,8 @@ class Webhook extends Controller
             $subscription->status = $data['status'];
             $subscription->plan_code = $data['plan']['plan_code'];
             $subscription->starts_at = $data['created_at'];
-            $subscription->ends_at = Carbon::parse($data['next_payment_date']);
-
+            // $subscription->ends_at = Carbon::parse($data['next_payment_date']);
+            $subscription->ends_at = Carbon::now();
 
             $subscription->save(); //save subscription
 
