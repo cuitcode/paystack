@@ -43,7 +43,7 @@ class Webhook extends Controller
     public function handleWebhook(Request $request)
     {
         $payload = json_decode($request->getContent(), true);
-        Log::info('webhook data'. $request->getContent());
+        // Log::info('webhook data'. $request->getContent());
         // dd(gettype($request->getContent()));
         // dd(json_last_error_msg());
         // dd($payload);
@@ -79,7 +79,7 @@ class Webhook extends Controller
             $subscription->paystack_id = $user->paystack_id;
             $subscription->status = $data['status'];
             $subscription->plan_code = $data['plan']['plan_code'];
-            $subscription->starts_at = $data['createdAt'];
+            $subscription->starts_at = $data['created_at'];
             $subscription->ends_at = $data['next_payment_date'];
 
 

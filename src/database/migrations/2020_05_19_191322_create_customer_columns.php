@@ -34,7 +34,7 @@ class CreateCustomerColumns extends Migration
             //
             $table->dropColumn([
                 'paystack_id',
-                // 'paystack_code',
+                'paystack_code',
                 'card_brand',
                 'card_last_four',
                 'trial_ends_at',
