@@ -12,7 +12,7 @@ use InvalidArgumentException;
 use Cuitcode\Paystack\Exceptions\IncompletePayment;
 use Cuitcode\Paystack\Exceptions\SubscriptionUpdateFailure;
 use LogicException;
-use Paystack\Subscription as PaystackSubscription;
+use Cuitcode\Paystack\Subscription as PaystackSubscription;
 
 class Subscription extends Model
 {
@@ -314,6 +314,38 @@ class Subscription extends Model
     public function scopeEnded($query)
     {
         $query->cancelled()->notOnGracePeriod();
+    }
+
+    /**
+     * Determine if the subscription is within its trial period.
+     *
+     * @return bool
+     */
+    public function onTrial()
+    {
+        return $this->trial_ends_at && $this->trial_ends_at->isFuture();
+    }
+
+    /**
+     * Filter query by on trial.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return void
+     */
+    public function scopeOnTrial($query)
+    {
+        $query->whereNotNull('trial_ends_at')->where('trial_ends_at', '>', Carbon::now());
+    }
+
+    /**
+     * Filter query by not on trial.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return void
+     */
+    public function scopeNotOnTrial($query)
+    {
+        $query->whereNull('trial_ends_at')->orWhere('trial_ends_at', '<=', Carbon::now());
     }
 
     /**
@@ -988,7 +1020,7 @@ class Subscription extends Model
     public function updatePaystackSubscription(array $options = [])
     {
         return PaystackSubscription::update(
-            $this->paystack_id, $options, $this->owner->paystackOptions()
+            $this->code, $options, $this->owner->paystackOptions()
         );
     }
 
@@ -1001,7 +1033,7 @@ class Subscription extends Model
     public function asPaystackSubscription(array $expand = [])
     {
         return PaystackSubscription::retrieve(
-            ['id' => $this->paystack_id, 'expand' => $expand], $this->owner->paystackOptions()
+            ['id' => $this->code, 'expand' => $expand], $this->owner->paystackOptions()
         );
     }
 }
