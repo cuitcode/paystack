@@ -2,6 +2,7 @@
 
 namespace Cuitcode\Paystack\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Cuitcode\Paystack\Paystack;
@@ -80,7 +81,7 @@ class Webhook extends Controller
             $subscription->status = $data['status'];
             $subscription->plan_code = $data['plan']['plan_code'];
             $subscription->starts_at = $data['created_at'];
-            $subscription->ends_at = $data['next_payment_date'];
+            $subscription->ends_at = Carbon::parse($data['next_payment_date']);
 
 
             $subscription->save(); //save subscription
