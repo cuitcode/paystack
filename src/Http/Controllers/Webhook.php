@@ -74,12 +74,12 @@ class Webhook extends Controller
             $data = $payload['data'];
             $subscription = new Subscription;
             $subscription->user_id = $user->id;
-            $subscription->code = $payload['data']['subscription_code'];
+            $subscription->code = $data['subscription_code'];
             $subscription->paystack_id = $user->paystack_id;
-            $subscription->status = $payload['data']['status'];
-            $subscription->plan_code = $payload['data']['plan']['plan_code'];
-            $subscription->starts_at = $payload['data']['createdAt'];
-            $subscription->ends_at = $payload['data']['createdAt'];
+            $subscription->status = $data['status'];
+            $subscription->plan_code = $data['plan']['plan_code'];
+            $subscription->starts_at = $data['createdAt'];
+            $subscription->ends_at = $data['next_payment_date'];
 
 
             $subscription->save(); //save subscription
