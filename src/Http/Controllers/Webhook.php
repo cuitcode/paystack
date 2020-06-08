@@ -52,6 +52,7 @@ class Webhook extends Controller
         // dd($payload);
         
         $method = 'handle'.Str::studly(str_replace('.', '_', $payload['event']));
+        Log::info('method'. $method);
         // return response()->json(['method' => $method]);
         WebhookReceived::dispatch($payload);
 
@@ -120,8 +121,11 @@ class Webhook extends Controller
      */
     protected function handleChargeSuccess(array $payload)
     {
+        Log::info('charge');
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
+
+            Log::info('success'. $data['reference']);
 
             $user->transactions->filter(function (Transaction $transaction) use ($data) {
                 return $transaction->reference === $data['reference'];
