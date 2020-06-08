@@ -17,8 +17,8 @@ class CreateAuthorizationsTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('transaction_id');
             $table->string('code')->unique();
-            $table->bigInteger('bin')->nullable();
-            $table->integer('last4')->nullable();
+            $table->string('bin', 6)->nullable();
+            $table->string('last_four', 4)->nullable();
             $table->integer('exp_month')->nullable();
             $table->year('exp_year')->nullable();
             $table->string('channel')->nullable();

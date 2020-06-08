@@ -16,9 +16,8 @@ class CreateCustomerColumns extends Migration
         Schema::table('users', function (Blueprint $table) {
             //
             $table->string('paystack_id')->nullable()->index();
-            $table->string('paystack_code')->nullable()->unique();
-            $table->string('card_brand')->nullable();
             $table->string('card_last_four', 4)->nullable();
+            $table->string('risk_action')->nullable();
             $table->timestamp('trial_ends_at')->nullable();
         });
     }
@@ -34,9 +33,7 @@ class CreateCustomerColumns extends Migration
             //
             $table->dropColumn([
                 'paystack_id',
-                'paystack_code',
-                'card_brand',
-                'card_last_four',
+                'risk_action',
                 'trial_ends_at',
             ]);
         });
