@@ -153,7 +153,7 @@ class Webhook extends Controller
                         'reusable' => $authorization['reusable']?? null,
                         'card_type' => $authorization['card_type']?? null,
                         'bin' => $authorization['bin']?? null,
-                        'last4' => $authorization['last4']?? null,
+                        'last_four' => $authorization['last4']?? null,
                         'exp_month' => $authorization['exp_month']?? null,
                         'exp_year' => $authorization['exp_year']?? null,
                         'brand' => $authorization['brand']?? null,
