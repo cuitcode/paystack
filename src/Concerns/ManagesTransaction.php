@@ -52,7 +52,7 @@ trait ManagesTransaction
              $options, $this->paystackOptions()
          );
 
-        $this->transaction()->create([
+        $this->transactions()->create([
             "access_code" => $trans["data"]->access_code,
             "reference" => $trans["data"]->reference,
         ]);
