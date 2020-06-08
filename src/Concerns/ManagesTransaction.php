@@ -52,8 +52,8 @@ trait ManagesTransaction
              $options, $this->paystackOptions()
          );
 
-        $transaction->access_code = $customer["data"]->access_code;
-        $transaction->reference = $customer["data"]->reference;
+        $transaction->access_code = $trans["data"]->access_code;
+        $transaction->reference = $trans["data"]->reference;
         $transaction->save();
  
          return $trans;
