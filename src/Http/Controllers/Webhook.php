@@ -121,15 +121,14 @@ class Webhook extends Controller
      */
     protected function handleChargeSuccess(array $payload)
     {
-        Log::info('charge');
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
 
-            Log::info('success'. $data['reference']);
+            // Log::info('success'. $data['reference']);
 
             $user->transactions->filter(function (Transaction $transaction) use ($data) {
                 return $transaction->reference === $data['reference'];
-            })->each(function (Subscription $transaction) use ($data) {
+            })->each(function (Transaction $transaction) use ($data) {
 
                 // Transaction Data...
                 $transaction->user_id = $user->id;
