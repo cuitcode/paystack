@@ -136,7 +136,7 @@ class Webhook extends Controller
                 $transaction->status = $data['status'] ?? null;
                 $transaction->gateway_response = $data['gateway_response'] ?? null;
                 $transaction->plan_code = $data['plan']['plan_code'] ?? null;
-                $transaction->amount = $data['plan']['amount'] ?? null;
+                $transaction->amount = $data['plan']['amount'] / 100 ?? null;
                 $transaction->paid_at = Carbon::createFromTimestamp($data['paid_at']);
 
                 $transaction->save();

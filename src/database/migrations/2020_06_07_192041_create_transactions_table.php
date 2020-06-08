@@ -20,7 +20,7 @@ class CreateTransactionsTable extends Migration
             $table->bigInteger("user_id");
             $table->bigInteger("paystack_id")->unique()->nullable();
             $table->string("plan_code")->nullable();
-            $table->decimal("amount", 8, 2)->nullable();
+            $table->double("amount", 8, 2)->nullable();
             $table->string("status")->default("pending");
             $table->string("gateway_response")->nullable();
             $table->string("currency")->nullable();
