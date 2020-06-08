@@ -52,7 +52,7 @@ class Webhook extends Controller
         // dd($payload);
         
         $method = 'handle'.Str::studly(str_replace('.', '_', $payload['event']));
-        Log::info('method'. $method);
+        // Log::info('method'. $method);
         // return response()->json(['method' => $method]);
         WebhookReceived::dispatch($payload);
 
