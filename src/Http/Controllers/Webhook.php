@@ -126,9 +126,9 @@ class Webhook extends Controller
 
             // Log::info('success'. $data['reference']);
 
-            $user->transactions->filter(function (Transaction $transaction) use ($data) {
+            $user->transactions->filter(function (Transaction $transaction) use ($data, $user) {
                 return $transaction->reference === $data['reference'];
-            })->each(function (Transaction $transaction) use ($data) {
+            })->each(function (Transaction $transaction) use ($data, $user) {
 
                 // Transaction Data...
                 $transaction->user_id = $user->id;
@@ -141,7 +141,7 @@ class Webhook extends Controller
 
                 $transaction->save();
 
-                // Update subscription authorization...
+                // Update transaction authorization...
                 if (isset($data['authorization'])) {
                     $authorization = $data['authorization'];
 
