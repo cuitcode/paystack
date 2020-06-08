@@ -145,7 +145,7 @@ class Webhook extends Controller
                 if (isset($data['authorization'])) {
                     $authorization = $data['authorization'];
 
-                    $subscription->authorization()->updateOrCreate([
+                    $transaction->authorization()->updateOrCreate([
                         'code' => $authorization['authorization_code'],
                     ], [
                         'channel' => $authorization['channel']?? null,
