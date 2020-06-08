@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Cuitcode\Paystack\Paystack;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Cuitcode\Paystack\Models\Authorization;
 use Cuitcode\Paystack\Models\Subscription;
+use Cuitcode\Paystack\Models\Transaction;
 use Cuitcode\Paystack\Events\WebhookHandled;
 use Cuitcode\Paystack\Events\WebhookReceived;
 use Symfony\Component\HttpFoundation\Response;
@@ -65,7 +67,7 @@ class Webhook extends Controller
     }
 
     /**
-     * Handle customer subscription updated.
+     * Handle customer subscription created.
      *
      * @param  array  $payload
      * @return \Symfony\Component\HttpFoundation\Response
@@ -77,11 +79,11 @@ class Webhook extends Controller
             $subscription = new Subscription;
             $subscription->user_id = $user->id;
             $subscription->code = $data['subscription_code'];
-            $subscription->paystack_id = $user->paystack_id;
+            $subscription->email_token = $data['email_token'];
             $subscription->status = $data['status'];
             $subscription->plan_code = $data['plan']['plan_code'];
-            $subscription->starts_at = Carbon::parse($data['created_at']);
-            $subscription->ends_at = Carbon::parse($data['next_payment_date']);
+            $subscription->starts_at = Carbon::createFromTimestamp($data['created_at']);
+            $subscription->ends_at = Carbon::createFromTimestamp($data['next_payment_date']);
 
             $subscription->save(); //save subscription
 
@@ -107,6 +109,57 @@ class Webhook extends Controller
             }
         }
 
+        return $this->successMethod();
+    }
+
+    /**
+     * Handle customer transaction updates.
+     *
+     * @param  array  $payload
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function handleChargeSuccess(array $payload)
+    {
+        if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
+            $data = $payload['data'];
+
+            $user->transactions->filter(function (Transaction $transaction) use ($data) {
+                return $transaction->reference === $data['reference'];
+            })->each(function (Subscription $transaction) use ($data) {
+
+                // Transaction Data...
+                $transaction->user_id = $user->id;
+                $transaction->paystack_id = $data['id'] ?? null;
+                $transaction->status = $data['status'] ?? null;
+                $transaction->gateway_response = $data['gateway_response'] ?? null;
+                $transaction->plan_code = $data['plan']['plan_code'] ?? null;
+                $transaction->amount = $data['plan']['amount'] ?? null;
+                $transaction->paid_at = Carbon::createFromTimestamp($data['paid_at']);
+
+                $transaction->save();
+
+                // Update subscription authorization...
+                if (isset($data['authorization'])) {
+                    $authorization = $data['authorization'];
+
+                    $subscription->authorization()->updateOrCreate([
+                        'code' => $authorization['authorization_code'],
+                    ], [
+                        'channel' => $authorization['channel']?? null,
+                        'country_code' => $authorization['country_code']?? null,
+                        'reusable' => $authorization['reusable']?? null,
+                        'card_type' => $authorization['card_type']?? null,
+                        'bin' => $authorization['bin']?? null,
+                        'last4' => $authorization['last4']?? null,
+                        'exp_month' => $authorization['exp_month']?? null,
+                        'exp_year' => $authorization['exp_year']?? null,
+                        'brand' => $authorization['brand']?? null,
+                        'bank' => $authorization['bank']?? null,
+                        'signature' => $authorization['signature']?? null,
+                    ]);
+                }
+            });
+        }
         return $this->successMethod();
     }
 

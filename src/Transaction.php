@@ -14,6 +14,9 @@ class Transaction extends ApiResource {
     // use ApiOperations\Request;
     // use ApiOperations\Update;
 
+    const STATUS_SUCCESS = 'success';
+    const STATUS_FAILED = 'failed';
+
     //
     public static function initialize($params = null, $options = null) {
         self::_validateParams($params);

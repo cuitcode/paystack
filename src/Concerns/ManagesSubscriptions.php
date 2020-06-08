@@ -8,27 +8,15 @@ use Cuitcode\Paystack\SubscriptionBuilder;
 trait ManagesSubscriptions
 {
     /**
-     * Begin creating a new subscription.
-     *
-     * @param  string  $name
-     * @param  string|string[]  $plans
-     * @return \Cuitcode\Paystack\SubscriptionBuilder
-     */
-    public function newSubscription($name, $plans)
-    {
-        return new SubscriptionBuilder($this, $name, $plans);
-    }
-
-    /**
      * Determine if the Paystack model has a given subscription.
      *
      * @param  string  $name
      * @param  string|null  $plan
      * @return bool
      */
-    public function subscribed($name = 'default', $plan = null)
+    public function subscribed($code, $plan = null)
     {
-        $subscription = $this->subscription($name);
+        $subscription = $this->subscription($code);
 
         if (! $subscription || ! $subscription->valid()) {
             return false;
@@ -85,9 +73,9 @@ trait ManagesSubscriptions
      * @param  string  $name
      * @return bool
      */
-    public function subscribedToPlan($plans, $name = 'default')
+    public function subscribedToPlan($plans, $code)
     {
-        $subscription = $this->subscription($name);
+        $subscription = $this->subscription($code);
 
         if (! $subscription || ! $subscription->valid()) {
             return false;

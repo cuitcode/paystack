@@ -6,10 +6,21 @@ use Cuitcode\Paystack\Paystack;
 use Cuitcode\Paystack\Exceptions\CustomerAlreadyCreated;
 use Cuitcode\Paystack\Exceptions\InvalidArgument;
 use Cuitcode\Paystack\Exceptions\InvalidCustomer;
+use Cuitcode\Paystack\Models\Transaction;
 use Cuitcode\Paystack\Transaction as PaystackTransaction;
 
 trait ManagesTransaction
 {
+    /**
+     * Get all of the transactions for the Paystack model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, $this->getForeignKey())->orderBy('created_at', 'desc');
+    }
+
     /**
      * Create a Paystack customer for the given model.
      *
@@ -20,10 +31,7 @@ trait ManagesTransaction
      */
      public function initializeTransaction(array $options = [])
      {
-        //  if (!$this->hasPaystackId()) {
-        //     //  throw CustomerAlreadyCreated::exists($this);
-        //      $this->createAsPaystackCustomer($options);
-        //  }
+        $transaction =  new Transaction;
  
          if (! array_key_exists('email', $options) && $email = $this->paystackEmail()) {
              $options['email'] = $email;
@@ -43,13 +51,10 @@ trait ManagesTransaction
          $trans = PaystackTransaction::initialize(
              $options, $this->paystackOptions()
          );
- 
-         // dd($customer);
- 
-        //  $this->paystack_id = $customer["data"]->id;
-         // $this->paystack_id = $customer["data"]["id"];
- 
-        //  $this->save();
+
+        $transaction->access_code = $customer["data"]->access_code;
+        $transaction->reference = $customer["data"]->reference;
+        $transaction->save();
  
          return $trans;
      }

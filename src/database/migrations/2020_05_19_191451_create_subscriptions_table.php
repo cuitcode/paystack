@@ -17,7 +17,7 @@ class CreateSubscriptionsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->string('code')->unique()->comments("subscription code");
-            $table->string('paystack_id')->comments("user paystack id");
+            $table->string('email_token')->comments("disabling token for user");
             $table->string('status')->comments("subscription status");
             $table->string('plan_code')->nullable();
             $table->integer('quantity')->default(1);
