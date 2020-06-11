@@ -35,7 +35,7 @@ trait ManagesTransaction
         // void previous access codes.
         $this->transactions->filter(function (Transaction $transaction) {
             return $transaction->status === 'pending';
-        })->each(function (Transaction $transaction) use ($data, $user) {
+        })->each(function (Transaction $transaction) {
 
             // Transaction Data...
             $transaction->status = "unused";
