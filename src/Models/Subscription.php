@@ -97,7 +97,7 @@ class Subscription extends Model
      */
     public function hasMultiplePlans()
     {
-        return is_null($this->paystack_plan);
+        return is_null($this->plan_code);
     }
 
     /**
@@ -113,18 +113,18 @@ class Subscription extends Model
     /**
      * Determine if the subscription has a specific plan.
      *
-     * @param  string  $plan
+     * @param  string  $plan_code
      * @return bool
      */
-    public function hasPlan($plan)
+    public function hasPlan($plan_code)
     {
         if ($this->hasMultiplePlans()) {
-            return $this->items->contains(function (SubscriptionItem $item) use ($plan) {
-                return $item->paystack_plan === $plan;
+            return $this->items->contains(function (SubscriptionItem $item) use ($plan_code) {
+                return $item->plan_code === $plan_code;
             });
         }
 
-        return $this->paystack_plan === $plan;
+        return $this->plan_code === $plan_code;
     }
 
     /**
@@ -135,9 +135,9 @@ class Subscription extends Model
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function findItemOrFail($plan)
+    public function findItemOrFail($plan_code)
     {
-        return $this->items()->where('paystack_plan', $plan)->firstOrFail();
+        return $this->items()->where('plan_code', $plan_code)->firstOrFail();
     }
 
     /**
@@ -157,7 +157,7 @@ class Subscription extends Model
      */
     public function incomplete()
     {
-        return $this->paystack_status === PaystackSubscription::STATUS_INCOMPLETE;
+        return $this->status === PaystackSubscription::STATUS_INCOMPLETE;
     }
 
     /**
@@ -168,7 +168,7 @@ class Subscription extends Model
      */
     public function scopeIncomplete($query)
     {
-        $query->where('paystack_status', PaystackSubscription::STATUS_INCOMPLETE);
+        $query->where('status', PaystackSubscription::STATUS_INCOMPLETE);
     }
 
     /**
@@ -178,7 +178,7 @@ class Subscription extends Model
      */
     public function pastDue()
     {
-        return $this->paystack_status === PaystackSubscription::STATUS_PAST_DUE;
+        return $this->status === PaystackSubscription::STATUS_PAST_DUE;
     }
 
     /**
@@ -189,7 +189,7 @@ class Subscription extends Model
      */
     public function scopePastDue($query)
     {
-        $query->where('paystack_status', PaystackSubscription::STATUS_PAST_DUE);
+        $query->where('status', PaystackSubscription::STATUS_PAST_DUE);
     }
 
     /**
@@ -200,10 +200,10 @@ class Subscription extends Model
     public function active()
     {
         return (is_null($this->ends_at) || $this->onGracePeriod()) &&
-            $this->paystack_status !== PaystackSubscription::STATUS_INCOMPLETE &&
-            $this->paystack_status !== PaystackSubscription::STATUS_INCOMPLETE_EXPIRED &&
-            (! Paystack::$deactivatePastDue || $this->paystack_status !== PaystackSubscription::STATUS_PAST_DUE) &&
-            $this->paystack_status !== PaystackSubscription::STATUS_UNPAID;
+            $this->status !== PaystackSubscription::STATUS_INCOMPLETE &&
+            $this->status !== PaystackSubscription::STATUS_INCOMPLETE_EXPIRED &&
+            (! Paystack::$deactivatePastDue || $this->status !== PaystackSubscription::STATUS_PAST_DUE) &&
+            $this->status !== PaystackSubscription::STATUS_UNPAID;
     }
 
     /**
@@ -219,12 +219,12 @@ class Subscription extends Model
                 ->orWhere(function ($query) {
                     $query->onGracePeriod();
                 });
-        })->where('paystack_status', '!=', PaystackSubscription::STATUS_INCOMPLETE)
-            ->where('paystack_status', '!=', PaystackSubscription::STATUS_INCOMPLETE_EXPIRED)
-            ->where('paystack_status', '!=', PaystackSubscription::STATUS_UNPAID);
+        })->where('status', '!=', PaystackSubscription::STATUS_INCOMPLETE)
+            ->where('status', '!=', PaystackSubscription::STATUS_INCOMPLETE_EXPIRED)
+            ->where('status', '!=', PaystackSubscription::STATUS_UNPAID);
 
         if (Paystack::$deactivatePastDue) {
-            $query->where('paystack_status', '!=', PaystackSubscription::STATUS_PAST_DUE);
+            $query->where('status', '!=', PaystackSubscription::STATUS_PAST_DUE);
         }
     }
 
@@ -237,7 +237,7 @@ class Subscription extends Model
     {
         $subscription = $this->asPaystackSubscription();
 
-        $this->paystack_status = $subscription->status;
+        $this->status = $subscription->status;
 
         $this->save();
     }
@@ -577,7 +577,7 @@ class Subscription extends Model
         );
 
         $this->fill([
-            'paystack_plan' => $paystackSubscription->plan ? $paystackSubscription->plan->id : null,
+            'plan_code' => $paystackSubscription->plan ? $paystackSubscription->plan->id : null,
             'quantity' => $paystackSubscription->quantity,
             'ends_at' => null,
         ])->save();
@@ -586,13 +586,13 @@ class Subscription extends Model
             $this->items()->updateOrCreate([
                 'paystack_id' => $item->id,
             ], [
-                'paystack_plan' => $item->plan->id,
+                'plan_code' => $item->plan->id,
                 'quantity' => $item->quantity,
             ]);
         }
 
         // Delete items that aren't attached to the subscription anymore...
-        $this->items()->whereNotIn('paystack_plan', $items->pluck('plan')->filter())->delete();
+        $this->items()->whereNotIn('plan_code', $items->pluck('plan')->filter())->delete();
 
         $this->unsetRelation('items');
 
@@ -695,26 +695,26 @@ class Subscription extends Model
      *
      * @throws \Cuitcode\Paystack\Exceptions\SubscriptionUpdateFailure
      */
-    public function addPlan($plan, $quantity = 1, $options = [])
+    public function addPlan($plan_code, $quantity = 1, $options = [])
     {
         $this->guardAgainstIncomplete();
 
-        if ($this->items->contains('paystack_plan', $plan)) {
-            throw SubscriptionUpdateFailure::duplicatePlan($this, $plan);
+        if ($this->items->contains('plan_code', $plan_code)) {
+            throw SubscriptionUpdateFailure::duplicatePlan($this, $plan_code);
         }
 
         $subscription = $this->asPaystackSubscription();
 
         $item = $subscription->items->create(array_merge([
-            'plan' => $plan,
+            'plan_code' => $plan_code,
             'quantity' => $quantity,
-            'tax_rates' => $this->getPlanTaxRatesForPayload($plan),
+            'tax_rates' => $this->getPlanTaxRatesForPayload($plan_code),
             'proration_behavior' => $this->prorateBehavior(),
         ], $options));
 
         $this->items()->create([
             'paystack_id' => $item->id,
-            'paystack_plan' => $plan,
+            'plan_code' => $plan_code,
             'quantity' => $quantity,
         ]);
 
@@ -722,7 +722,7 @@ class Subscription extends Model
 
         if ($this->hasSinglePlan()) {
             $this->fill([
-                'paystack_plan' => null,
+                'plan_code' => null,
                 'quantity' => null,
             ])->save();
         }
@@ -770,7 +770,7 @@ class Subscription extends Model
             'proration_behavior' => $this->prorateBehavior(),
         ]);
 
-        $this->items()->where('paystack_plan', $plan)->delete();
+        $this->items()->where('plan_code', $plan)->delete();
 
         $this->unsetRelation('items');
 
@@ -778,7 +778,7 @@ class Subscription extends Model
             $item = $this->items()->first();
 
             $this->fill([
-                'paystack_plan' => $item->paystack_plan,
+                'plan_code' => $item->plan_code,
                 'quantity' => $item->quantity,
             ])->save();
         }
@@ -799,18 +799,7 @@ class Subscription extends Model
 
         $subscription = $subscription->save();
 
-        $this->paystack_status = $subscription->status;
-
-        // If the user was on trial, we will set the grace period to end when the trial
-        // would have ended. Otherwise, we'll retrieve the end of the billing period
-        // period and make that the end of the grace period for this current user.
-        if ($this->onTrial()) {
-            $this->ends_at = $this->trial_ends_at;
-        } else {
-            $this->ends_at = Carbon::createFromTimestamp(
-                $subscription->current_period_end
-            );
-        }
+        $this->status = $subscription->status;
 
         $this->save();
 
@@ -842,7 +831,7 @@ class Subscription extends Model
     public function markAsCancelled()
     {
         $this->fill([
-            'paystack_status' => PaystackSubscription::STATUS_CANCELED,
+            'status' => PaystackSubscription::STATUS_CANCELED,
             'ends_at' => Carbon::now(),
         ])->save();
     }
@@ -876,7 +865,7 @@ class Subscription extends Model
         // local database to indicate that the subscription is active again and is
         // no longer "cancelled". Then we will save this record in the database.
         $this->fill([
-            'paystack_status' => $subscription->status,
+            'status' => $subscription->status,
             'ends_at' => null,
         ])->save();
 
@@ -898,7 +887,7 @@ class Subscription extends Model
         } catch (IncompletePayment $exception) {
             // Set the new Paystack subscription status immediately when payment fails...
             $this->fill([
-                'paystack_status' => $exception->payment->invoice->subscription->status,
+                'status' => $exception->payment->invoice->subscription->status,
             ])->save();
 
             throw $exception;
@@ -936,7 +925,7 @@ class Subscription extends Model
         foreach ($this->items as $item) {
             $paystackSubscriptionItem = $item->asPaystackSubscriptionItem();
 
-            $paystackSubscriptionItem->tax_rates = $this->getPlanTaxRatesForPayload($item->paystack_plan);
+            $paystackSubscriptionItem->tax_rates = $this->getPlanTaxRatesForPayload($item->plan_code);
 
             $paystackSubscriptionItem->save();
         }

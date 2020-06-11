@@ -14,7 +14,7 @@ trait ManagesSubscriptions
      * @param  string|null  $plan
      * @return bool
      */
-    public function subscribed($code, $plan = null)
+    public function subscribed($code, $plan_code = null)
     {
         $subscription = $this->subscription($code);
 
@@ -22,7 +22,7 @@ trait ManagesSubscriptions
             return false;
         }
 
-        return $plan ? $subscription->hasPlan($plan) : true;
+        return $plan_code ? $subscription->hasPlan($plan_code) : true;
     }
 
     /**
@@ -96,10 +96,10 @@ trait ManagesSubscriptions
      * @param  string  $plan
      * @return bool
      */
-    public function onPlan($plan)
+    public function onPlan($plan_code)
     {
-        return ! is_null($this->subscriptions->first(function (Subscription $subscription) use ($plan) {
-            return $subscription->valid() && $subscription->hasPlan($plan);
+        return ! is_null($this->subscriptions->first(function (Subscription $subscription) use ($plan_code) {
+            return $subscription->valid() && $subscription->hasPlan($plan_code);
         }));
     }
 
