@@ -33,47 +33,13 @@ trait ManagesTransaction
      public function initializeTransaction(array $options = [])
      {
         // void previous access codes.
-        $transaction =  $this->transactions()->where("status","pending")->first();
-        $transaction->status = "unused";
-        $transaction->save();
-
-        
-
         $this->transactions->filter(function (Transaction $transaction) {
-            return $transaction->reference === $data['reference'];
+            return $transaction->status === 'pending';
         })->each(function (Transaction $transaction) use ($data, $user) {
 
             // Transaction Data...
-            $transaction->user_id = $user->id;
-            $transaction->paystack_id = $data['id'] ?? null;
-            $transaction->status = $data['status'] ?? null;
-            $transaction->gateway_response = $data['gateway_response'] ?? null;
-            $transaction->plan_code = $data['plan']['plan_code'] ?? null;
-            $transaction->amount = $data['plan']['amount'] / 100 ?? null;
-            $transaction->paid_at = Carbon::createFromTimestamp($data['paid_at']);
-
+            $transaction->status = "unused";
             $transaction->save();
-
-            // Update transaction authorization...
-            if (isset($data['authorization'])) {
-                $authorization = $data['authorization'];
-
-                $transaction->authorization()->updateOrCreate([
-                    'code' => $authorization['authorization_code'],
-                ], [
-                    'channel' => $authorization['channel']?? null,
-                    'country_code' => $authorization['country_code']?? null,
-                    'reusable' => $authorization['reusable']?? null,
-                    'card_type' => $authorization['card_type']?? null,
-                    'bin' => $authorization['bin']?? null,
-                    'last_four' => $authorization['last4']?? null,
-                    'exp_month' => $authorization['exp_month']?? null,
-                    'exp_year' => $authorization['exp_year']?? null,
-                    'brand' => $authorization['brand']?? null,
-                    'bank' => $authorization['bank']?? null,
-                    'signature' => $authorization['signature']?? null,
-                ]);
-            }
         });
  
          if (! array_key_exists('email', $options) && $email = $this->paystackEmail()) {
