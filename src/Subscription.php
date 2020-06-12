@@ -48,7 +48,10 @@ class Subscription extends ApiResource
      */
     public function cancel($params = null, $opts = null)
     {
-        return $this->_delete($params, $opts);
+        // return $this->_delete($params, $opts);
+        $url = $this->instanceUrl() . '/cancel';
+        list($response, $opts) = $this->_request('post', $url, $params, $opts);
+        $this->refreshFrom(['discount' => null], $opts, true);
     }
 
     /**

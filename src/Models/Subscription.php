@@ -815,7 +815,10 @@ class Subscription extends Model
     {
         $subscription = $this->asPaystackSubscription();
 
-        $subscription->cancel();
+        $subscription->cancel([
+            "code" => $subscription['data']->subscription_code,
+            "token" => $subscription['data']->email_token, 
+        ], $this->owner->paystackOptions());
 
         $this->markAsCancelled();
 
