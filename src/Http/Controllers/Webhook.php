@@ -52,7 +52,7 @@ class Webhook extends Controller
         // dd($payload);
         
         $method = 'handle'.Str::studly(str_replace('.', '_', $payload['event']));
-        // Log::info('method'. $method);
+        Log::info('method'. $method);
         // return response()->json(['method' => $method]);
         WebhookReceived::dispatch($payload);
 
@@ -124,16 +124,17 @@ class Webhook extends Controller
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
 
-            // Log::info('success'. $data['reference']);
+            Log::info('success'. $data['reference']);
 
             $user->transactions->filter(function (Transaction $transaction) use ($data, $user) {
                 return $transaction->reference === $data['reference'];
             })->each(function (Transaction $transaction) use ($data, $user) {
 
+                Log::info('success 2'. $data['reference']);
+
                 // Transaction Data...
-                $transaction->user_id = $user->id;
                 $transaction->paystack_id = $data['id'] ?? null;
-                $transaction->status = $data['status'] ?? null;
+                $transaction->status = $data['status'] ?? $transaction->status;
                 $transaction->gateway_response = $data['gateway_response'] ?? null;
                 $transaction->plan_code = $data['plan']['plan_code'] ?? null;
                 $transaction->amount = $data['plan']['amount'] / 100 ?? null;
