@@ -72,6 +72,7 @@ class Webhook extends Controller
      */
     protected function handleSubscriptionCreate(array $payload)
     {
+        Log::info('why not?');
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
             $subscription = new Subscription;
@@ -118,6 +119,7 @@ class Webhook extends Controller
      */
     protected function handleChargeSuccess(array $payload)
     {
+        Log::info('why not 2?');
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
 
