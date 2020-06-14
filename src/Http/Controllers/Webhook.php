@@ -72,7 +72,6 @@ class Webhook extends Controller
      */
     protected function handleSubscriptionCreate(array $payload)
     {
-        Log::info('why not?');
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
             $subscription = new Subscription;
@@ -85,8 +84,6 @@ class Webhook extends Controller
             $subscription->ends_at = Carbon::createFromTimestamp($data['next_payment_date']);
 
             $subscription->save(); //save subscription
-
-            // Log::info('done saving subscription');
 
             // Update subscription items...
             if (isset($data['items'])) {
@@ -119,17 +116,12 @@ class Webhook extends Controller
      */
     protected function handleChargeSuccess(array $payload)
     {
-        Log::info('why not 2?');
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
-
-            Log::info('success'. $data['reference']);
 
             $user->transactions->filter(function (Transaction $transaction) use ($data, $user) {
                 return $transaction->reference === $data['reference'];
             })->each(function (Transaction $transaction) use ($data, $user) {
-
-                Log::info('success 2'. $data['reference']);
 
                 // Transaction Data...
                 $transaction->paystack_id = $data['id'] ?? null;

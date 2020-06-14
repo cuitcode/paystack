@@ -32,6 +32,8 @@ trait ManagesTransaction
      */
      public function initializeTransaction(array $options = [])
      {
+        $this->createOrGetPaystackCustomer();
+
         // void previous access codes.
         $this->transactions->filter(function (Transaction $transaction) {
             return $transaction->status === 'pending';
