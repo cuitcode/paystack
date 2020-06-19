@@ -53,7 +53,7 @@ class Webhook extends Controller
         WebhookReceived::dispatch($payload);
 
         if (method_exists($this, $method)) {
-            Log::info('method '. $method);
+            // Log::info('method '. $method);
             $response = $this->{$method}($payload);
 
             WebhookHandled::dispatch($payload);
@@ -80,8 +80,8 @@ class Webhook extends Controller
             $subscription->email_token = $data['email_token'];
             $subscription->status = $data['status'];
             $subscription->plan_code = $data['plan']['plan_code'];
-            $subscription->starts_at = Carbon::createFromTimestamp($data['created_at']);
-            $subscription->ends_at = Carbon::createFromTimestamp($data['next_payment_date']);
+            $subscription->starts_at = Carbon::parse($data['created_at'])->setTimezone("UTC");
+            $subscription->ends_at = Carbon::parse($data['next_payment_date'])->setTimezone("UTC");
 
             $subscription->save(); //save subscription
 
@@ -129,7 +129,7 @@ class Webhook extends Controller
                 $transaction->gateway_response = $data['gateway_response'] ?? null;
                 $transaction->plan_code = $data['plan']['plan_code'] ?? null;
                 $transaction->amount = $data['plan']['amount'] / 100 ?? null;
-                $transaction->paid_at = Carbon::createFromTimestamp($data['paid_at']);
+                $transaction->paid_at = Carbon::parse($data['paid_at'])->setTimezone("UTC");
 
                 $transaction->save();
 
