@@ -109,7 +109,7 @@ trait ManagesCustomer
      public function updatePaystackCustomer(array $options = [])
      {
          return PaystackCustomer::update(
-             $this->paystack_id, $options, $this->paystackOptions()
+             $this->paystack_code, $options, $this->paystackOptions()
          );
      }
 
@@ -137,7 +137,7 @@ trait ManagesCustomer
     {
         $this->assertCustomerExists();
 
-        return PaystackCustomer::retrieve($this->paystack_id, $this->paystackOptions());
+        return PaystackCustomer::retrieve($this->paystack_code, $this->paystackOptions());
     }
     /**
      * Get the email address used to create the customer in Paystack.
