@@ -1,6 +1,6 @@
 <?php
 
-namespace Cuitcode\Paystack;
+namespace Cuitcode\Paystack\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Cuitcode\Paystack\Models\Subscription;

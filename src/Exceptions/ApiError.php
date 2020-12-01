@@ -1,6 +1,6 @@
 <?php
 
-namespace Cuitcode\Paystack\Exception;
+namespace Cuitcode\Paystack\Exceptions;
 use Exception;
 
 class ApiError extends Exception
