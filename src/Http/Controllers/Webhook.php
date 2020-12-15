@@ -122,12 +122,15 @@ class Webhook extends Controller
             $transaction = Transaction::firstOrCreate(
                 ['reference' => $data['reference']],
                 [
-                    'paystack_id' => $data['id'] ?? null,
+                    'paystack_id' => $data['id'],
+                    'access_code' => $data['access_code'] ?? $data['id'],
                     'user_id' => $user->id,
                     'status' => $data['status'] ?? status,
                     'gateway_response' => $data['gateway_response'] ?? null,
                     'plan_code' => $data['plan']['plan_code'] ?? null,
                     'amount' => $data['plan']['amount'] / 100 ?? null,
+                    'currency' => $data['plan']['currency'] / 100 ?? null,
+                    'fees' => $data['plan']['fees'] ?? null,
                     'paid_at' => Carbon::parse($data['paid_at'])->setTimezone("UTC"),
                 ]
             );

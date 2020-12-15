@@ -15,7 +15,7 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string("access_code")->unique();
+            $table->string("access_code")->unique()->nullable();
             $table->string("reference")->unique();
             $table->bigInteger("user_id");
             $table->bigInteger("paystack_id")->unique()->nullable();
