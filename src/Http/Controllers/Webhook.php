@@ -128,7 +128,7 @@ class Webhook extends Controller
                     'status' => $data['status'] ?? status,
                     'gateway_response' => $data['gateway_response'] ?? null,
                     'plan_code' => $data['plan']['plan_code'] ?? null,
-                    'amount' => $data['plan']['amount'] / 100 ?? null,
+                    'amount' => $data['plan']['amount'] ?? null,
                     'currency' => $data['plan']['currency'] ?? null,
                     'fees' => $data['plan']['fees'] ?? null,
                     'paid_at' => Carbon::parse($data['paid_at'])->setTimezone("UTC"),
