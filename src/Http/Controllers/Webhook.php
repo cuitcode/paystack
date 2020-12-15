@@ -119,41 +119,40 @@ class Webhook extends Controller
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
 
-            $user->transactions->filter(function (Transaction $transaction) use ($data, $user) {
-                return $transaction->reference === $data['reference'];
-            })->each(function (Transaction $transaction) use ($data, $user) {
+            $transaction = Transaction::firstOrCreate(
+                ['reference' => $data['reference']],
+                [
+                    'paystack_id' => $data['id'] ?? null,
+                    'user_id' => $user->id,
+                    'status' => $data['status'] ?? status,
+                    'gateway_response' => $data['gateway_response'] ?? null,
+                    'plan_code' => $data['plan']['plan_code'] ?? null,
+                    'amount' => $data['plan']['amount'] / 100 ?? null,
+                    'paid_at' => Carbon::parse($data['paid_at'])->setTimezone("UTC"),
+                ]
+            );
 
-                // Transaction Data...
-                $transaction->paystack_id = $data['id'] ?? null;
-                $transaction->status = $data['status'] ?? $transaction->status;
-                $transaction->gateway_response = $data['gateway_response'] ?? null;
-                $transaction->plan_code = $data['plan']['plan_code'] ?? null;
-                $transaction->amount = $data['plan']['amount'] / 100 ?? null;
-                $transaction->paid_at = Carbon::parse($data['paid_at'])->setTimezone("UTC");
+            $transaction->save();
 
-                $transaction->save();
+            if (isset($data['authorization'])) {
+                $authorization = $data['authorization'];
 
-                // Update transaction authorization...
-                if (isset($data['authorization'])) {
-                    $authorization = $data['authorization'];
-
-                    $transaction->authorization()->updateOrCreate([
-                        'code' => $authorization['authorization_code'],
-                    ], [
-                        'channel' => $authorization['channel']?? null,
-                        'country_code' => $authorization['country_code']?? null,
-                        'reusable' => $authorization['reusable']?? null,
-                        'card_type' => $authorization['card_type']?? null,
-                        'bin' => $authorization['bin']?? null,
-                        'last_four' => $authorization['last4']?? null,
-                        'exp_month' => $authorization['exp_month']?? null,
-                        'exp_year' => $authorization['exp_year']?? null,
-                        'brand' => $authorization['brand']?? null,
-                        'bank' => $authorization['bank']?? null,
-                        'signature' => $authorization['signature']?? null,
-                    ]);
-                }
-            });
+                $transaction->authorization()->updateOrCreate([
+                    'code' => $authorization['authorization_code'],
+                ], [
+                    'channel' => $authorization['channel']?? null,
+                    'country_code' => $authorization['country_code']?? null,
+                    'reusable' => $authorization['reusable']?? null,
+                    'card_type' => $authorization['card_type']?? null,
+                    'bin' => $authorization['bin']?? null,
+                    'last_four' => $authorization['last4']?? null,
+                    'exp_month' => $authorization['exp_month']?? null,
+                    'exp_year' => $authorization['exp_year']?? null,
+                    'brand' => $authorization['brand']?? null,
+                    'bank' => $authorization['bank']?? null,
+                    'signature' => $authorization['signature']?? null,
+                ]);
+            }
         }
         return $this->successMethod();
     }
