@@ -85,12 +85,9 @@ trait ManagesPlan
             $this->paystackOptions()
         );
 
-        // dd($plan);
-
         $this->plan_code = $plan['data']->plan_code;
-        // $this->plan_code = $plan["data"]["id"];
 
-        $this->save();
+        $this->saveQuietly();
 
         return $plan;
     }
