@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 use Cuitcode\Paystack\Paystack;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
-use Cuitcode\Paystack\Models\Authorization;
-use Cuitcode\Paystack\Models\Subscription;
 use Cuitcode\Paystack\Models\Transaction;
+use Cuitcode\Paystack\Models\Subscription;
+use Cuitcode\Paystack\Models\Authorization;
 use Cuitcode\Paystack\Events\WebhookHandled;
 use Cuitcode\Paystack\Events\WebhookReceived;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,7 +28,7 @@ class Webhook extends Controller
         $secret = config('cc_paystack.test.secret');
 
         // return live credentials
-        if(config('cc_paystack.live_mode')) {
+        if (config('cc_paystack.live_mode')) {
             $secret = config('cc_paystack.live.secret');
         }
 
@@ -46,9 +46,10 @@ class Webhook extends Controller
     public function handleWebhook(Request $request)
     {
         $payload = json_decode($request->getContent(), true);
-        Log::info('webhook data'. $request->getContent());
-        
-        $method = 'handle'.Str::studly(str_replace('.', '_', $payload['event']));
+
+        Log::info('webhook data' . $request->getContent());
+
+        $method = 'handle' . Str::studly(str_replace('.', '_', $payload['event']));
 
         WebhookReceived::dispatch($payload);
 
@@ -80,8 +81,9 @@ class Webhook extends Controller
             $subscription->email_token = $data['email_token'];
             $subscription->status = $data['status'];
             $subscription->plan_code = $data['plan']['plan_code'];
-            $subscription->starts_at = Carbon::parse($data['created_at'])->setTimezone("UTC");
-            $subscription->ends_at = Carbon::parse($data['next_payment_date'])->setTimezone("UTC");
+
+            $subscription->starts_at = Carbon::parse($data['created_at'])->setTimezone('UTC');
+            $subscription->ends_at = Carbon::parse($data['next_payment_date'])->setTimezone('UTC');
 
             $subscription->save(); //save subscription
 
@@ -125,13 +127,13 @@ class Webhook extends Controller
                     'paystack_id' => $data['id'],
                     'access_code' => $data['access_code'] ?? $data['id'],
                     'user_id' => $user->id,
-                    'status' => $data['status'] ?? status,
+                    'status' => $data['status'] ?? null,
                     'gateway_response' => $data['gateway_response'] ?? null,
                     'plan_code' => $data['plan']['plan_code'] ?? null,
                     'amount' => $data['plan']['amount'] ?? null,
                     'currency' => $data['plan']['currency'] ?? null,
                     'fees' => $data['plan']['fees'] ?? null,
-                    'paid_at' => Carbon::parse($data['paid_at'])->setTimezone("UTC"),
+                    'paid_at' => Carbon::parse($data['paid_at'])->setTimezone('UTC'),
                 ]
             );
 
@@ -143,20 +145,45 @@ class Webhook extends Controller
                 $transaction->authorization()->updateOrCreate([
                     'code' => $authorization['authorization_code'],
                 ], [
-                    'channel' => $authorization['channel']?? null,
-                    'country_code' => $authorization['country_code']?? null,
-                    'reusable' => $authorization['reusable']?? null,
-                    'card_type' => $authorization['card_type']?? null,
-                    'bin' => $authorization['bin']?? null,
-                    'last_four' => $authorization['last4']?? null,
-                    'exp_month' => $authorization['exp_month']?? null,
-                    'exp_year' => $authorization['exp_year']?? null,
-                    'brand' => $authorization['brand']?? null,
-                    'bank' => $authorization['bank']?? null,
-                    'signature' => $authorization['signature']?? null,
+                    'channel' => $authorization['channel'] ?? null,
+                    'country_code' => $authorization['country_code'] ?? null,
+                    'reusable' => $authorization['reusable'] ?? null,
+                    'card_type' => $authorization['card_type'] ?? null,
+                    'bin' => $authorization['bin'] ?? null,
+                    'last_four' => $authorization['last4'] ?? null,
+                    'exp_month' => $authorization['exp_month'] ?? null,
+                    'exp_year' => $authorization['exp_year'] ?? null,
+                    'brand' => $authorization['brand'] ?? null,
+                    'bank' => $authorization['bank'] ?? null,
+                    'signature' => $authorization['signature'] ?? null,
                 ]);
             }
         }
+
+        return $this->successMethod();
+    }
+
+    /**
+     * Handle customer failed payment.
+     *
+     * @param  array  $payload
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function handleInvoicePaymentFailed(array $payload)
+    {
+        // Check user exists
+        if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
+            $data = $payload['data'];
+
+            // checks subscription exists
+            if ($subscription = Subscription::find($data['subscription']['subscription_code'])) {
+                // end subscription
+                $subscription->status = 'inactive';
+                $subscription->ends_at = now();
+                $subscription->save();
+            }
+        }
+
         return $this->successMethod();
     }
 

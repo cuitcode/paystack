@@ -100,21 +100,21 @@ trait ManagesPlan
      */
     public function updatePaystackPlan(array $options = [])
     {
-        if (!array_key_exists('name', $options) && $name = $this->name) {
-            $options['name'] = $name;
-        }
+        $options['name'] = $options['name'] ?? $this->name;
+        $options['description'] = $options['description'] ?? $this->description;
+        $options['amount'] = $options['amount'] ?? $this->amount;
 
-        if (!array_key_exists('description', $options) && $description = $this->description) {
-            $options['description'] = $description;
-        }
+        // if (!array_key_exists('name', $options) && $name = $this->name) {
+        //     $options['name'] = $name;
+        // }
 
-        if (!array_key_exists('amount', $options) && $amount = $this->amount) {
-            $options['amount'] = $amount;
-        }
+        // if (!array_key_exists('description', $options) && $description = $this->description) {
+        //     $options['description'] = $description;
+        // }
 
-        if (!array_key_exists('currency', $options) && $currency = $this->currency) {
-            $options['currency'] = $currency;
-        }
+        // if (!array_key_exists('amount', $options) && $amount = $this->amount) {
+        //     $options['amount'] = $amount;
+        // }
 
         return PaystackPlan::update(
             $this->plan_code,
