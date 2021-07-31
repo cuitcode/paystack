@@ -57,25 +57,11 @@ trait ManagesPlan
             throw AlreadyCreated::exists($this, 'plan_code');
         }
 
-        if (!array_key_exists('name', $options) && $name = $this->name) {
-            $options['name'] = $name;
-        }
-
-        if (!array_key_exists('description', $options) && $description = $this->description) {
-            $options['description'] = $description;
-        }
-
-        if (!array_key_exists('amount', $options) && $amount = $this->amount) {
-            $options['amount'] = $amount;
-        }
-
-        if (!array_key_exists('interval', $options) && $interval = $this->interval) {
-            $options['interval'] = $interval;
-        }
-
-        if (!array_key_exists('currency', $options) && $currency = $this->currency) {
-            $options['currency'] = $currency;
-        }
+        $options['name'] = $options['name'] ?? $this->name;
+        $options['description'] = $options['description'] ?? $this->description;
+        $options['amount'] = $options['amount'] ?? $this->amount;
+        $options['interval'] = $options['interval'] ?? $this->interval;
+        $options['currency'] = $options['currency'] ?? $this->currency;
 
         // Here we will create the customer instance on Paystack and store the ID of the
         // user from Paystack. This ID will correspond with the Paystack user instances
@@ -104,18 +90,6 @@ trait ManagesPlan
         $options['description'] = $options['description'] ?? $this->description;
         $options['amount'] = $options['amount'] ?? $this->amount;
 
-        // if (!array_key_exists('name', $options) && $name = $this->name) {
-        //     $options['name'] = $name;
-        // }
-
-        // if (!array_key_exists('description', $options) && $description = $this->description) {
-        //     $options['description'] = $description;
-        // }
-
-        // if (!array_key_exists('amount', $options) && $amount = $this->amount) {
-        //     $options['amount'] = $amount;
-        // }
-
         return PaystackPlan::update(
             $this->plan_code,
             $options,
@@ -131,9 +105,7 @@ trait ManagesPlan
      */
     public function deletePaystackPlan(array $options = [])
     {
-        if (!array_key_exists('name', $options) && $name = $this->name) {
-            $options['name'] = $name;
-        }
+        $options['name'] = $options['name'] ?? $this->name;
 
         if (null == $this->plan_code) {
             return;

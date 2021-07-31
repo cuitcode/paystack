@@ -3,10 +3,10 @@
 namespace Cuitcode\Paystack\Concerns;
 
 use Cuitcode\Paystack\Paystack;
-use Cuitcode\Paystack\Exceptions\CustomerAlreadyCreated;
 use Cuitcode\Paystack\Exceptions\InvalidArgument;
 use Cuitcode\Paystack\Exceptions\InvalidCustomer;
 use Cuitcode\Paystack\Customer as PaystackCustomer;
+use Cuitcode\Paystack\Exceptions\CustomerAlreadyCreated;
 
 trait ManagesCustomer
 {
@@ -37,7 +37,7 @@ trait ManagesCustomer
      */
     public function hasPaystackId()
     {
-        return ! is_null($this->paystack_id);
+        return !is_null($this->paystack_id);
     }
 
     /**
@@ -49,7 +49,7 @@ trait ManagesCustomer
      */
     protected function assertCustomerExists()
     {
-        if (! $this->hasPaystackId()) {
+        if (!$this->hasPaystackId()) {
             throw InvalidCustomer::notYetCreated($this);
         }
     }
@@ -68,32 +68,21 @@ trait ManagesCustomer
             throw CustomerAlreadyCreated::exists($this);
         }
 
-        if (! array_key_exists('email', $options) && $email = $this->paystackEmail()) {
-            $options['email'] = $email;
-        }
-
-        if (! array_key_exists('first_name', $options) && $first_name = $this->paystackFirstName()) {
-            $options['first_name'] = $first_name;
-        }
-
-        if (! array_key_exists('last_name', $options) && $last_name = $this->paystackLastName()) {
-            $options['last_name'] = $last_name;
-        }
-
-        if (! array_key_exists('phone_number', $options) && $phone_number = $this->paystackPhoneNumber()) {
-            $options['phone_number'] = $phone_number;
-        }
+        $options['email'] = $options['email'] ?? $this->email;
+        $options['first_name'] = $options['first_name'] ?? $this->first_name;
+        $options['last_name'] = $options['last_name'] ?? $this->last_name;
+        $options['phone_number'] = $options['phone_number'] ?? $this->phone_number;
 
         // Here we will create the customer instance on Paystack and store the ID of the
         // user from Paystack. This ID will correspond with the Paystack user instances
         // and allow us to retrieve users from Paystack later when we need to work.
         $customer = PaystackCustomer::create(
-            $options, $this->paystackOptions()
+            $options,
+            $this->paystackOptions()
         );
 
-        $this->paystack_id = $customer["data"]->id;
-        $this->paystack_code = $customer["data"]->customer_code;
-        // $this->paystack_id = $customer["data"]["id"];
+        $this->paystack_id = $customer['data']->id;
+        $this->paystack_code = $customer['data']->customer_code;
 
         $this->save();
 
@@ -106,12 +95,14 @@ trait ManagesCustomer
      * @param  array  $options
      * @return Cuitcode\Paystack\Customer
      */
-     public function updatePaystackCustomer(array $options = [])
-     {
-         return PaystackCustomer::update(
-             $this->paystack_code, $options, $this->paystackOptions()
-         );
-     }
+    public function updatePaystackCustomer(array $options = [])
+    {
+        return PaystackCustomer::update(
+            $this->paystack_code,
+            $options,
+            $this->paystackOptions()
+        );
+    }
 
     /**
      * Get the Paystack customer instance for the current user or create one.
@@ -119,26 +110,27 @@ trait ManagesCustomer
      * @param  array  $options
      * @return \Paystack\Customer
      */
-     public function createOrGetPaystackCustomer(array $options = [])
-     {
-         if ($this->hasPaystackId()) {
-             return $this->asPaystackCustomer();
-         }
- 
-         return $this->createAsPaystackCustomer($options);
-     }
+    public function createOrGetPaystackCustomer(array $options = [])
+    {
+        if ($this->hasPaystackId()) {
+            return $this->asPaystackCustomer();
+        }
 
-     /**
-     * Get the Paystack customer for the model.
-     *
-     * @return \Paystack\Customer
-     */
+        return $this->createAsPaystackCustomer($options);
+    }
+
+    /**
+    * Get the Paystack customer for the model.
+    *
+    * @return \Paystack\Customer
+    */
     public function asPaystackCustomer()
     {
         $this->assertCustomerExists();
 
         return PaystackCustomer::retrieve($this->paystack_code, $this->paystackOptions());
     }
+
     /**
      * Get the email address used to create the customer in Paystack.
      *
