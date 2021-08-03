@@ -3,15 +3,15 @@
 namespace Cuitcode\Paystack\Models;
 
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
+use LogicException;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
+use Carbon\CarbonInterface;
 use InvalidArgumentException;
+use Illuminate\Support\Collection;
 // use Cuitcode\Paystack\Concerns\Prorates;
+use Illuminate\Database\Eloquent\Model;
 use Cuitcode\Paystack\Exceptions\IncompletePayment;
 use Cuitcode\Paystack\Exceptions\SubscriptionUpdateFailure;
-use LogicException;
 use Cuitcode\Paystack\Subscription as PaystackSubscription;
 
 class Subscription extends Model
@@ -107,7 +107,7 @@ class Subscription extends Model
      */
     public function hasSinglePlan()
     {
-        return ! $this->hasMultiplePlans();
+        return !$this->hasMultiplePlans();
     }
 
     /**
@@ -202,7 +202,7 @@ class Subscription extends Model
         return (is_null($this->ends_at) || $this->onGracePeriod()) &&
             $this->status !== PaystackSubscription::STATUS_INCOMPLETE &&
             $this->status !== PaystackSubscription::STATUS_INCOMPLETE_EXPIRED &&
-            (! Paystack::$deactivatePastDue || $this->status !== PaystackSubscription::STATUS_PAST_DUE) &&
+            (!Paystack::$deactivatePastDue || $this->status !== PaystackSubscription::STATUS_PAST_DUE) &&
             $this->status !== PaystackSubscription::STATUS_UNPAID;
     }
 
@@ -249,7 +249,7 @@ class Subscription extends Model
      */
     public function recurring()
     {
-        return ! $this->onTrial() && ! $this->cancelled();
+        return !$this->onTrial() && !$this->cancelled();
     }
 
     /**
@@ -270,7 +270,7 @@ class Subscription extends Model
      */
     public function cancelled()
     {
-        return ! is_null($this->ends_at);
+        return !is_null($this->ends_at);
     }
 
     /**
@@ -302,7 +302,7 @@ class Subscription extends Model
      */
     public function ended()
     {
-        return $this->cancelled() && ! $this->onGracePeriod();
+        return $this->cancelled() && !$this->onGracePeriod();
     }
 
     /**
@@ -534,7 +534,7 @@ class Subscription extends Model
      */
     public function extendTrial(CarbonInterface $date)
     {
-        if (! $date->isFuture()) {
+        if (!$date->isFuture()) {
             throw new InvalidArgumentException("Extending a subscription's trial requires a date in the future.");
         }
 
@@ -573,7 +573,9 @@ class Subscription extends Model
         );
 
         $paystackSubscription = PaystackSubscription::update(
-            $this->paystack_id, $this->getSwapOptions($items, $options), $this->owner->paystackOptions()
+            $this->paystack_id,
+            $this->getSwapOptions($items, $options),
+            $this->owner->paystackOptions()
         );
 
         $this->fill([
@@ -649,7 +651,7 @@ class Subscription extends Model
         foreach ($this->asPaystackSubscription()->items->data as $paystackSubscriptionItem) {
             $plan = $paystackSubscriptionItem->plan->id;
 
-            if (! $item = $items->get($plan, [])) {
+            if (!$item = $items->get($plan, [])) {
                 $item['deleted'] = true;
             }
 
@@ -674,7 +676,7 @@ class Subscription extends Model
             'cancel_at_period_end' => false,
         ], $options);
 
-        if (! is_null($this->billingCycleAnchor)) {
+        if (!is_null($this->billingCycleAnchor)) {
             $options['billing_cycle_anchor'] = $this->billingCycleAnchor;
         }
 
@@ -787,6 +789,25 @@ class Subscription extends Model
     }
 
     /**
+     * Disable the subscription now.
+     *
+     * @return $this
+     */
+    public function disable()
+    {
+        $subscription = $this->asPaystackSubscription();
+        $subscription = PaystackSubscription::disable(
+            ['code' => $this->code, 'token' => $this->email_token],
+            $this->owner->paystackOptions()
+        );
+
+        $this->status = PaystackSubscription::STATUS_DISABLED;
+        $this->save();
+
+        return $this;
+    }
+
+    /**
      * Cancel the subscription at the end of the billing period.
      *
      * @return $this
@@ -816,8 +837,8 @@ class Subscription extends Model
         $subscription = $this->asPaystackSubscription();
 
         $subscription->cancel([
-            "code" => $subscription['data']->subscription_code,
-            "token" => $subscription['data']->email_token, 
+            'code' => $subscription['data']->subscription_code,
+            'token' => $subscription['data']->email_token,
         ], $this->owner->paystackOptions());
 
         $this->markAsCancelled();
@@ -848,7 +869,7 @@ class Subscription extends Model
      */
     public function resume()
     {
-        if (! $this->onGracePeriod()) {
+        if (!$this->onGracePeriod()) {
             throw new LogicException('Unable to resume subscription that is not within grace period.');
         }
 
@@ -1012,7 +1033,9 @@ class Subscription extends Model
     public function updatePaystackSubscription(array $options = [])
     {
         return PaystackSubscription::update(
-            $this->code, $options, $this->owner->paystackOptions()
+            $this->code,
+            $options,
+            $this->owner->paystackOptions()
         );
     }
 
@@ -1025,7 +1048,8 @@ class Subscription extends Model
     public function asPaystackSubscription(array $expand = [])
     {
         return PaystackSubscription::retrieve(
-            ['id' => $this->code, 'expand' => $expand], $this->owner->paystackOptions()
+            ['id' => $this->code, 'expand' => $expand],
+            $this->owner->paystackOptions()
         );
     }
 }

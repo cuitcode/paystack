@@ -2,10 +2,10 @@
 
 namespace Cuitcode\Paystack;
 
+use Cuitcode\Paystack\Utils\Util;
 use Cuitcode\Paystack\ApiRequestor;
 use Cuitcode\Paystack\PaystackObject;
 use Cuitcode\Paystack\Exceptions\UnexpectedValue;
-use Cuitcode\Paystack\Utils\Util;
 
 // use Paystack;
 /**
@@ -129,21 +129,21 @@ abstract class ApiResource extends PaystackObject
      *
      * @return ApiResource the refreshed resource
      */
-     public function refresh()
-     {
-         $requestor = new ApiRequestor($this->_opts->apiKey, static::baseUrl());
-         $url = $this->instanceUrl();
- 
-         list($response, $this->_opts->apiKey) = $requestor->request(
-             'get',
-             $url,
-             $this->_retrieveOptions,
-             $this->_opts->headers
-         );
-         $this->setLastResponse($response);
-         $this->refreshFrom($response->json, $this->_opts);
- 
-         return $this;
+    public function refresh()
+    {
+        $requestor = new ApiRequestor($this->_opts->apiKey, static::baseUrl());
+        $url = $this->instanceUrl();
+
+        list($response, $this->_opts->apiKey) = $requestor->request(
+            'get',
+            $url,
+            $this->_retrieveOptions,
+            $this->_opts->headers
+        );
+        $this->setLastResponse($response);
+        $this->refreshFrom($response->json, $this->_opts);
+
+        return $this;
         //  return $response->json;
-     }
+    }
 }

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Cuitcode\Paystack\Paystack;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Cuitcode\Paystack\Models\Retries;
 use Cuitcode\Paystack\Models\Transaction;
 use Cuitcode\Paystack\Models\Subscription;
 use Cuitcode\Paystack\Models\Authorization;
@@ -15,6 +16,7 @@ use Cuitcode\Paystack\Events\WebhookHandled;
 use Cuitcode\Paystack\Events\WebhookReceived;
 use Symfony\Component\HttpFoundation\Response;
 use Cuitcode\Paystack\Http\Middlewares\VerifySignature;
+use Cuitcode\Paystack\Subscription as PaystackSubscription;
 
 class Webhook extends Controller
 {
@@ -171,20 +173,52 @@ class Webhook extends Controller
      */
     protected function handleInvoicePaymentFailed(array $payload)
     {
+        $retrials_enabled = config('cc_paystack.retrials_enabled');
+        $retrials_max = config('cc_paystack.retrials_max');
+        $retrials_interval = config('cc_paystack.retrials_interval');
+
         // Check user exists
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
             $data = $payload['data'];
 
-            // checks subscription exists
-            if ($subscription = Subscription::find($data['subscription']['subscription_code'])) {
-                // end subscription
-                $subscription->status = 'inactive';
-                $subscription->ends_at = now();
-                $subscription->save();
+            // Terminate if the authorization and subsctiption do not exist
+            if (!$data['authorization'] && !$data['subscription']) {
+                return $this->successMethod();
             }
+
+            $authorization = Authorization::where($data['authorization']['authorization_code'])->first();
+            $subscription = Subscription::where($data['subscription']['subscription_code'])->first();
+
+            $retry = Retries::firstOrNew(
+                [
+                    'user_id' => $user->id,
+                    'authorization_id' => $authorization->id,
+                    'subscription_id' => $subscription->id,
+                    'status' => Retries::STATUS_ACTIVE,
+                ],
+            );
+
+            if (!$retrials_enabled || $retry->count > $retrials_max) {
+                $this->endSubscription($subscription);
+                $retry->status = Retries::STATUS_INACTIVE;
+            }
+
+            $retry->count++;
+            $retry->save();
         }
 
         return $this->successMethod();
+    }
+
+    /**
+     * Handle customer failed payment end subscription.
+     *
+     * @param  Cuitcode\Paystack\Models\Subscription $subscription
+     * @return void
+     */
+    protected function endSubscription(Subscription $subscription): void
+    {
+        $subscription->disable();
     }
 
     /**

@@ -18,7 +18,7 @@ trait ManagesSubscriptions
     {
         $subscription = $this->subscription($code);
 
-        if (! $subscription || ! $subscription->valid()) {
+        if (!$subscription || !$subscription->valid()) {
             return false;
         }
 
@@ -36,7 +36,33 @@ trait ManagesSubscriptions
         return $this->subscriptions->sortByDesc(function (Subscription $subscription) {
             return $subscription->created_at->getTimestamp();
         })->first(function (Subscription $subscription) use ($code) {
-            if(null === $code) return $subscription->status === 'active';
+            if (null === $code) {
+                return $subscription->status === 'active';
+            }
+
+            return $subscription->code === $code;
+        });
+    }
+
+    /**
+     * Disable a subscription instance by name.
+     *
+     * @param  string  $name
+     * @return \Cuitcode\Paystack\Subscription|null
+     */
+    public function disableSubscription($code)
+    {
+        if (null === $code) {
+            return;
+        }
+
+        return $this->subscriptions->sortByDesc(function (Subscription $subscription) {
+            return $subscription->created_at->getTimestamp();
+        })->first(function (Subscription $subscription) use ($code) {
+            if (null === $code) {
+                return $subscription->status === 'active';
+            }
+
             return $subscription->code === $code;
         });
     }
@@ -77,7 +103,7 @@ trait ManagesSubscriptions
     {
         $subscription = $this->subscription($code);
 
-        if (! $subscription || ! $subscription->valid()) {
+        if (!$subscription || !$subscription->valid()) {
             return false;
         }
 
@@ -98,7 +124,7 @@ trait ManagesSubscriptions
      */
     public function onPlan($plan_code)
     {
-        return ! is_null($this->subscriptions->first(function (Subscription $subscription) use ($plan_code) {
+        return !is_null($this->subscriptions->first(function (Subscription $subscription) use ($plan_code) {
             return $subscription->valid() && $subscription->hasPlan($plan_code);
         }));
     }

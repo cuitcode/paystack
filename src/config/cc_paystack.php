@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Cuitcode Paystack Configuration file
@@ -18,23 +17,29 @@ return [
     | API STATUS
     |--------------------------------------------------------------------------
     |
-    | Paystack credentials can be used live or in test mode. 
-    | This config sets it to live. 
+    | Paystack credentials can be used live or in test mode.
+    | This config sets it to live.
     |
     | Supported: (TRUE, FALSE)
     | Default: FALSE
     |
     */
 
-    'live_mode' => env('CC_PAYSTACK_LIVE_MODE', FALSE),
+    'live_mode' => env('CC_PAYSTACK_LIVE_MODE', false),
+
+    'retrials_enabled' => env('CC_PAYSTACK_RETRIES_ENABLED', false),
+
+    'retrials_max' => env('CC_PAYSTACK_RETRIES_MAX', false),
+
+    'retrials_interval' => env('CC_PAYSTACK_RETRIES_INTERVAL', false),
 
     /*
     |--------------------------------------------------------------------------
     | Test Credentials ***DO NOT USE IN PRODUCTION***
     |--------------------------------------------------------------------------
     |
-    | Paystack credentials can be used live or in test mode. 
-    | This config is for the test mode. 
+    | Paystack credentials can be used live or in test mode.
+    | This config is for the test mode.
     |
     |secret: Test Secret Key
     |public: Test Public Key
@@ -44,19 +49,20 @@ return [
     */
 
     'test' => [
-        'secret' => env('CC_PAYSTACK_TEST_SECRET', NULL), // sk_test_your_secret_key_is_required
-        'public' => env('CC_PAYSTACK_TEST_PUBLIC', NULL), // pk_test_your_public_key_is_required
+        'secret' => env('CC_PAYSTACK_TEST_SECRET', null), // sk_test_your_secret_key_is_required
+        'public' => env('CC_PAYSTACK_TEST_PUBLIC', null), // pk_test_your_public_key_is_required
         'callback' => env('CC_PAYSTACK_TEST_CALLBACK', '/paystack/test/callback'),
         'webhook' => env('CC_PAYSTACK_TEST_WEBHOOK', '/paystack/test/webhook'),
     ],
 
-     /*
+    /*
+
     |--------------------------------------------------------------------------
     | Live Credentials
     |--------------------------------------------------------------------------
     |
-    | Paystack credentials can be used live or in test mode. 
-    | This config is for the live mode. 
+    | Paystack credentials can be used live or in test mode.
+    | This config is for the live mode.
     |
     |secret: Live Secret Key
     |public: Live Public Key
@@ -66,8 +72,8 @@ return [
     */
 
     'live' => [
-        'secret' => env('CC_PAYSTACK_LIVE_SECRET', NULL), // sk_live_your_secret_key_is_required
-        'public' => env('CC_PAYSTACK_LIVE_PUBLIC', NULL), // pk_live_your_public_key_is_required
+        'secret' => env('CC_PAYSTACK_LIVE_SECRET', null), // sk_live_your_secret_key_is_required
+        'public' => env('CC_PAYSTACK_LIVE_PUBLIC', null), // pk_live_your_public_key_is_required
         'callback' => env('CC_PAYSTACK_LIVE_CALLBACK', '/paystack/callback'),
         'webhook' => env('CC_PAYSTACK_LIVE_WEBHOOK', '/paystack/webhook'),
     ],

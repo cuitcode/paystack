@@ -15,11 +15,19 @@ class Subscription extends ApiResource
     use ApiOperations\Update;
 
     const STATUS_ACTIVE = 'active';
+
+    const STATUS_DISABLED = 'disabled';
+
     const STATUS_CANCELED = 'canceled';
+
     const STATUS_INCOMPLETE = 'incomplete';
+
     const STATUS_INCOMPLETE_EXPIRED = 'incomplete_expired';
+
     const STATUS_PAST_DUE = 'past_due';
+
     const STATUS_TRIALING = 'trialing';
+
     const STATUS_UNPAID = 'unpaid';
 
     use ApiOperations\Delete {
@@ -44,14 +52,32 @@ class Subscription extends ApiResource
      *
      * @throws \Cuitcode\Paystack\Exception\ApiErrorException if the request fails
      *
-     * @return \Cuitcode\Paystack\Subscription the deleted subscription
+     * @return \Cuitcode\Paystack\Subscription the disabled subscription
      */
-    public function cancel($params = null, $opts = null)
+    public static function disable($params = null, $options = null)
     {
         // return $this->_delete($params, $opts);
-        $url = $this->instanceUrl() . '/cancel';
-        list($response, $opts) = $this->_request('post', $url, $params, $opts);
-        // $this->refreshFrom(['discount' => null], $opts, true);
+        $url = static::classUrl() . '/disable';
+        list($response, $opts) = static::_staticRequest('post', $url, $params, $options);
+
+        return $response;
+    }
+
+    /**
+     * @param null|array $params
+     * @param null|array|string $opts
+     *
+     * @throws \Cuitcode\Paystack\Exception\ApiErrorException if the request fails
+     *
+     * @return \Cuitcode\Paystack\Subscription the enabled subscription
+     */
+    public static function enable($params = null, $opts = null)
+    {
+        // return static::_delete($params, $opts);
+        $url = static::instanceUrl() . '/disable';
+
+        list($response, $opts) = static::_staticRequest('post', $url, $params, $opts);
+        // static::refreshFrom(['discount' => null], $opts, true);
     }
 
     /**
