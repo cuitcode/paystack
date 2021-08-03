@@ -2,9 +2,12 @@
 
 namespace Cuitcode\Paystack\Console\Commands;
 
-use App\Models\User;
-use App\Support\DripEmailer;
+use Cuitcode\Paystack\Paystack;
 use Illuminate\Console\Command;
+use Cuitcode\Paystack\Models\Plan;
+use Cuitcode\Paystack\Transaction;
+use Cuitcode\Paystack\Models\Retries;
+use Cuitcode\Paystack\Models\Subscription;
 
 class RetryFailedPayments extends Command
 {
@@ -40,6 +43,30 @@ class RetryFailedPayments extends Command
      */
     public function handle()
     {
-        $this->info('The command was successful!');
+        $retries = Retries::active()->get();
+
+        foreach ($retries as $retry) {
+            $this->info('Start retry for ' . $retry->subscription_id);
+
+            $subscription = Subscription::find($retry->subscription_id);
+            $plan = Plan::where($subscription->plan_code)->first();
+            $user = $subscription->user();
+
+            $resp = Transaction::chargeAuthorization([
+                'authorization_code' => $retry->authorization_code,
+                'email' => $user->email,
+                'amount' => $plan->amount,
+            ], Paystack::paystackOptions());
+
+            if ($resp['data']['status'] == 'success') {
+                $this->info('Successfully retried ' . $retry->subscription_id);
+                $retry->status = Retries::STATUS_INACTIVE;
+            } else {
+                $this->error('Failed to retry ' . $retry->subscription_id);
+                $retry->count++;
+            }
+
+            $retry->save();
+        }
     }
 }
