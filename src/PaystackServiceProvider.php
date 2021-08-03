@@ -5,6 +5,7 @@ namespace Cuitcode\Paystack;
 use Cuitcode\Paystack\Models\Plan;
 use Illuminate\Support\ServiceProvider;
 use Cuitcode\Paystack\Observers\PlanObserver;
+use Cuitcode\Paystack\Console\Commands\RetryFailedPayments;
 
 class PaystackServiceProvider extends ServiceProvider
 {
@@ -15,7 +16,6 @@ class PaystackServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
     }
 
     /**
@@ -25,12 +25,18 @@ class PaystackServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
-        include __DIR__.'/routes.php';
+        include __DIR__ . '/routes.php';
+
         $this->publishes([
-            __DIR__.'/config/cc_paystack.php' => config_path('cc_paystack.php'),
+            __DIR__ . '/config/cc_paystack.php' => config_path('cc_paystack.php'),
         ]);
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+
         Plan::observe(PlanObserver::class);
+
+        $this->commands([
+            RetryFailedPayments::class,
+        ]);
     }
 }
