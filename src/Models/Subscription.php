@@ -8,9 +8,9 @@ use DateTimeInterface;
 use Carbon\CarbonInterface;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
-// use Cuitcode\Paystack\Concerns\Prorates;
 use Illuminate\Database\Eloquent\Model;
 use Cuitcode\Paystack\Exceptions\IncompletePayment;
+use Cuitcode\Paystack\Events\Subscriptions\Disabled;
 use Cuitcode\Paystack\Exceptions\SubscriptionUpdateFailure;
 use Cuitcode\Paystack\Subscription as PaystackSubscription;
 
@@ -803,6 +803,8 @@ class Subscription extends Model
 
         $this->status = PaystackSubscription::STATUS_DISABLED;
         $this->save();
+
+        Disabled::dispatch($this);
 
         return $this;
     }

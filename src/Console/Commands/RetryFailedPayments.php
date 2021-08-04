@@ -8,6 +8,8 @@ use Cuitcode\Paystack\Models\Plan;
 use Cuitcode\Paystack\Transaction;
 use Cuitcode\Paystack\Models\Retries;
 use Cuitcode\Paystack\Models\Subscription;
+use Cuitcode\Paystack\Events\Subscriptions\FailedRetry;
+use Cuitcode\Paystack\Events\Subscriptions\SuccessfulRetry;
 
 class RetryFailedPayments extends Command
 {
@@ -62,9 +64,14 @@ class RetryFailedPayments extends Command
 
                 if ($resp['data']['status'] == 'success') {
                     $this->info('Successfully retried ' . $retry->subscription_id);
+                    SuccessfulRetry::dispatch($retry->authorization_id, $retry->id, $retry->subscription_id);
+
                     $retry->status = Retries::STATUS_INACTIVE;
                 } else {
                     $this->error('Failed to retry ' . $retry->subscription_id);
+
+                    FailedRetry::dispatch($retry->authorization_id, $retry->id, $retry->subscription_id);
+
                     $retry->count++;
                 }
             } else {
