@@ -33,6 +33,6 @@ class CreateAuthorizationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('authorizations');
+        Schema::dropIfExists('retries');
     }
 }
