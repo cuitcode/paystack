@@ -16,13 +16,20 @@ class Retries extends Model
 
     protected $fillable = ['user_id', 'authorization_id', 'subscription_id', 'status'];
 
-    public function scopeActive()
+    public function isValid()
     {
-        return $this->where('status', self::STATUS_ACTIVE);
+        $retrials_max = config('cc_paystack.retrials_max');
+
+        return $this->count < $retrials_max;
     }
 
-    public function scopeInactive()
+    public function scopeActive($query)
     {
-        return $this->where('status', self::STATUS_INACTIVE);
+        return $query->active()->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->active()->where('status', self::STATUS_INACTIVE);
     }
 }

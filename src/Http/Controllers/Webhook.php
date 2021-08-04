@@ -186,25 +186,20 @@ class Webhook extends Controller
                 return $this->successMethod();
             }
 
-            $authorization = Authorization::where($data['authorization']['authorization_code'])->first();
-            $subscription = Subscription::where($data['subscription']['subscription_code'])->first();
+            // Create retry record if retrial is enabled
+            if (!$retrials_enabled) {
+                $authorization = Authorization::where($data['authorization']['authorization_code'])->first();
+                $subscription = Subscription::where($data['subscription']['subscription_code'])->first();
 
-            $retry = Retries::firstOrNew(
-                [
-                    'user_id' => $user->id,
-                    'authorization_id' => $authorization->id,
-                    'subscription_id' => $subscription->id,
-                    'status' => Retries::STATUS_ACTIVE,
-                ],
-            );
-
-            if (!$retrials_enabled || $retry->count > $retrials_max) {
-                $this->endSubscription($subscription);
-                $retry->status = Retries::STATUS_INACTIVE;
+                Retries::firstOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'authorization_id' => $authorization->id,
+                        'subscription_id' => $subscription->id,
+                        'status' => Retries::STATUS_ACTIVE,
+                    ],
+                );
             }
-
-            $retry->count++;
-            $retry->save();
         }
 
         return $this->successMethod();

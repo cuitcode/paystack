@@ -46,24 +46,31 @@ class RetryFailedPayments extends Command
         $retries = Retries::active()->get();
 
         foreach ($retries as $retry) {
-            $this->info('Start retry for ' . $retry->subscription_id);
-
             $subscription = Subscription::find($retry->subscription_id);
-            $plan = Plan::where($subscription->plan_code)->first();
-            $user = $subscription->user();
 
-            $resp = Transaction::chargeAuthorization([
-                'authorization_code' => $retry->authorization_code,
-                'email' => $user->email,
-                'amount' => $plan->amount,
-            ], Paystack::paystackOptions());
+            if ($retry->isValid()) {
+                $this->info('Start retry for ' . $retry->subscription_id);
 
-            if ($resp['data']['status'] == 'success') {
-                $this->info('Successfully retried ' . $retry->subscription_id);
-                $retry->status = Retries::STATUS_INACTIVE;
+                $plan = Plan::where($subscription->plan_code)->first();
+                $user = $subscription->user();
+
+                $resp = Transaction::chargeAuthorization([
+                    'authorization_code' => $retry->authorization_code,
+                    'email' => $user->email,
+                    'amount' => $plan->amount,
+                ], Paystack::paystackOptions());
+
+                if ($resp['data']['status'] == 'success') {
+                    $this->info('Successfully retried ' . $retry->subscription_id);
+                    $retry->status = Retries::STATUS_INACTIVE;
+                } else {
+                    $this->error('Failed to retry ' . $retry->subscription_id);
+                    $retry->count++;
+                }
             } else {
-                $this->error('Failed to retry ' . $retry->subscription_id);
-                $retry->count++;
+                $this->info('Disabling subscription with ID ' . $retry->subscription_id);
+                $subscription->disable();
+                $retry->status = Retries::STATUS_INACTIVE;
             }
 
             $retry->save();
