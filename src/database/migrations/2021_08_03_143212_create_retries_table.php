@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAuthorizationsTable extends Migration
+class CreateRetriesTable extends Migration
 {
     /**
      * Run the migrations.
