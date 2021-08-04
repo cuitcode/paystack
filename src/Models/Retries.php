@@ -12,6 +12,8 @@ class Retries extends Model
 
     const STATUS_INACTIVE = 'inactive';
 
+    protected $table = 'retries';
+
     protected $fillable = ['user_id', 'authorization_id', 'subscription_id', 'status'];
 
     public function scopeActive()
