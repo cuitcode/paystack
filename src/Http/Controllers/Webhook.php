@@ -174,8 +174,6 @@ class Webhook extends Controller
     protected function handleInvoicePaymentFailed(array $payload)
     {
         $retrials_enabled = config('cc_paystack.retrials_enabled');
-        $retrials_max = config('cc_paystack.retrials_max');
-        $retrials_interval = config('cc_paystack.retrials_interval');
 
         // Check user exists
         if ($user = $this->getUserByPaystackCode($payload['data']['customer']['customer_code'])) {
@@ -187,7 +185,7 @@ class Webhook extends Controller
             }
 
             // Create retry record if retrial is enabled
-            if (!$retrials_enabled) {
+            if ($retrials_enabled) {
                 $authorization = Authorization::where($data['authorization']['authorization_code'])->first();
                 $subscription = Subscription::where($data['subscription']['subscription_code'])->first();
 
