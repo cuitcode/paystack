@@ -73,7 +73,8 @@ trait ManagesPlan
 
         $this->plan_code = $plan['data']->plan_code;
 
-        $this->saveQuietly();
+        $this->unsetEventDispatcher();
+        $this->save();
 
         return $plan;
     }
